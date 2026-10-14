@@ -1,0 +1,798 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bahasa Ocean Quest - Media Pembelajaran Interaktif & Adaptif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #0b1329; color: #f8fafc; }
+        .ocean-bg { background: radial-gradient(circle at top, #1e3a8a 0%, #0f172a 70%); }
+        .card-glass { background: rgba(30, 41, 59, 0.75); backdrop-filter: blur(16px); border: 1px solid rgba(56, 189, 248, 0.25); }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+        .float-anim { animation: float 3s ease-in-out infinite; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col ocean-bg">
+
+    <header class="bg-slate-900/90 border-b border-sky-500/20 px-6 py-4 sticky top-0 z-50 backdrop-blur-md flex justify-between items-center shadow-lg">
+        <div class="flex items-center space-x-3">
+            <span class="text-3xl">🌊</span>
+            <div>
+                <h1 id="appTitleHeader" class="text-xl font-bold text-sky-400 tracking-wide">Bahasa Ocean Quest</h1>
+                <p id="appSubtitleHeader" class="text-xs text-slate-400">Media Pembelajaran Interaktif Bahasa Indonesia</p>
+            </div>
+        </div>
+        <div class="flex space-x-2 flex-wrap gap-1">
+            <button onclick="playSound('click'); switchView('material')" id="navMaterialBtn" class="px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition">Materi & Tujuan</button>
+            <button onclick="playSound('click'); switchView('student')" id="navStudentBtn" class="px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-sky-600 text-white shadow-lg transition hover:bg-sky-500">Mode Siswa</button>
+            <button onclick="playSound('click'); promptTeacherLogin()" id="navTeacherBtn" class="px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center space-x-1">
+                <span>🔒</span><span>Dashboard Guru</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-8 flex flex-col justify-center">
+
+        <!-- ================= LEARNING MATERIAL & OBJECTIVES VIEW ================= -->
+        <div id="materialView" class="hidden space-y-6">
+            <div class="card-glass p-6 md:p-10 rounded-3xl shadow-2xl space-y-8">
+                <div class="border-b border-sky-500/25 pb-4 flex justify-between items-center flex-wrap gap-4">
+                    <div>
+                        <span id="subjectBadgeText" class="text-xs uppercase tracking-wider text-sky-400 font-bold">Modul Pembelajaran Bahasa Indonesia</span>
+                        <h2 id="materialMainTitle" class="text-2xl md:text-3xl font-extrabold text-white mt-1">Eksplorasi Teks Deskripsi & Kebahasaan</h2>
+                    </div>
+                    <button onclick="playSound('click'); switchView('student')" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition shadow-lg">Mulai Latihan Soal 🚀</button>
+                </div>
+
+                <!-- Tujuan Pembelajaran -->
+                <div class="space-y-3">
+                    <h3 class="text-lg font-bold text-sky-300 flex items-center space-x-2">
+                        <span>🎯</span><span>Tujuan Pembelajaran</span>
+                    </h3>
+                    <div id="learningObjectivesContainer" class="bg-slate-900/70 p-5 rounded-2xl border border-slate-700 text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+                        1. Siswa mampu memahami struktur, ciri, dan kaidah kebahasaan dalam teks deskripsi.<br>
+                        2. Siswa dapat mengidentifikasi gagasan utama, kalimat penjelas, serta makna kata dalam paragraf.
+                    </div>
+                </div>
+
+                <!-- Materi Lengkap Ala Buku Paket -->
+                <div class="space-y-3">
+                    <h3 class="text-lg font-bold text-sky-300 flex items-center space-x-2">
+                        <span>📖</span><span>Materi Pembelajaran Lengkap (Buku Paket)</span>
+                    </h3>
+                    <div id="textbookContentContainer" class="bg-slate-900/80 p-6 rounded-2xl border border-sky-500/30 space-y-4 text-sm text-slate-300 leading-relaxed">
+                        <div>
+                            <h4 class="text-base font-bold text-white mb-2">A. Pengertian dan Ciri Teks Deskripsi</h4>
+                            <p>Teks deskripsi adalah teks yang melukiskan atau menggambarkan suatu objek, tempat, atau suasana tertentu secara jelas dan terperinci sehingga pembaca seolah-olah melihat, mendengar, atau merasakan sendiri.</p>
+                            <ul class="list-disc list-inside space-y-1.5 pl-2 mt-2">
+                                <li class="text-sky-300"><strong>Ciri Objek:</strong> Menggambarkan objek (seperti keindahan pantai, terumbu karang, atau hewan laut) secara konkret dan melibatkan panca indra.</li>
+                                <li class="text-sky-300"><strong>Gagasan Utama:</strong> Ide pokok atau inti pembahasan yang menjadi dasar pengembangan sebuah paragraf.</li>
+                                <li class="text-sky-300"><strong>Kalimat Penjelas:</strong> Kalimat yang berfungsi menjelaskan atau merinci gagasan utama secara lebih spesifik.</li>
+                                <li class="text-sky-300"><strong>Sinonim & Antonim:</strong> Sinonim adalah persamaan kata (misal: indahnya = eloknya), sedangkan antonim adalah lawan kata (misal: bersih >< kotor).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kesimpulan Di Bagian Akhir Materi -->
+                <div class="space-y-3 border-t border-slate-800 pt-4">
+                    <h3 class="text-lg font-bold text-sky-300 flex items-center space-x-2">
+                        <span>💡</span><span>Kesimpulan Pembelajaran</span>
+                    </h3>
+                    <div id="materialConclusionBox" class="bg-slate-900/70 p-5 rounded-2xl border border-sky-500/20 text-sm text-slate-300 leading-relaxed whitespace-pre-line">
+                        Melalui pemahaman kaidah bahasa Indonesia dan ketelitian dalam membaca teks deskripsi, kita dapat menyampaikan informasi secara efektif dan estetis. Keterampilan ini sangat penting dalam mengekspresikan keindahan alam serta menjaga kelestarian lingkungan sekitar!
+                    </div>
+                </div>
+
+                <div class="text-center pt-2">
+                    <button onclick="playSound('click'); switchView('student')" class="px-8 py-3 bg-gradient-to-r from-sky-500 to-blue-600 rounded-xl font-bold text-white shadow-lg hover:opacity-95 transition">Mulai Latihan & Petualangan 🚀</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= STUDENT VIEW ================= -->
+        <div id="studentView" class="space-y-6">
+            <div id="studentLoginCard" class="card-glass max-w-md mx-auto p-8 rounded-3xl shadow-2xl text-center space-y-6">
+                <div class="text-6xl float-anim">🐬</div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Misi Penyelamatan Laut</h2>
+                    <p class="text-sm text-slate-300 mt-1">Selesaikan soal materi bahasa Indonesia untuk membersihkan sampah dan memulihkan ekosistem terumbu karang!</p>
+                </div>
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-semibold text-sky-300 uppercase mb-1">Nama Lengkap Siswa</label>
+                        <input type="text" id="studentNameInput" placeholder="Contoh: Siti Aminah" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-sky-300 uppercase mb-1">Kode Ruangan</label>
+                        <input type="text" id="roomCodeInput" value="BAHASA2026" class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-4 py-3 text-white font-mono uppercase tracking-widest focus:outline-none focus:border-sky-500">
+                    </div>
+                    <button onclick="playSound('click'); startStudentGame()" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 rounded-xl font-bold text-white shadow-lg hover:opacity-95 transition transform active:scale-95">Mulai Petualangan 🚀</button>
+                </div>
+            </div>
+
+            <div id="studentGameArea" class="hidden space-y-6">
+                <!-- Status & Ocean Progress Bar -->
+                <div class="card-glass p-6 rounded-3xl space-y-4 shadow-xl">
+                    <div class="flex justify-between items-center flex-wrap gap-4">
+                        <div>
+                            <span class="text-xs uppercase text-sky-400 font-semibold tracking-wider">Penjelajah Aktif</span>
+                            <h3 id="displayStudentName" class="text-xl font-bold text-white">Siswa</h3>
+                        </div>
+                        <div class="flex items-center space-x-6">
+                            <div class="text-right">
+                                <span class="text-xs text-slate-400">Poin Misi</span>
+                                <div id="displayScore" class="text-2xl font-extrabold text-sky-400">0 Poin</div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs text-slate-400">Progres Soal</span>
+                                <div id="displayProgressCount" class="text-2xl font-extrabold text-emerald-400">0 / 0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Visual Ocean Cleanup Progress -->
+                    <div>
+                        <div class="flex justify-between text-xs text-slate-300 mb-1.5">
+                            <span id="oceanStatusText">Kondisi Laut: Penuh Sampah Plastik 🗑️</span>
+                            <span id="oceanPercent">0% Bersih</span>
+                        </div>
+                        <div class="w-full bg-slate-900 h-5 rounded-full overflow-hidden p-0.5 border border-sky-500/30">
+                            <div id="oceanProgressBar" class="bg-gradient-to-r from-sky-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Card -->
+                <div id="questionCardContainer" class="card-glass p-8 md:p-10 rounded-3xl shadow-2xl space-y-6">
+                    <div class="flex justify-between items-center">
+                        <span id="questionBadge" class="px-3 py-1 bg-sky-500/20 border border-sky-500/40 text-sky-300 text-xs font-semibold rounded-full">Soal #1</span>
+                        <span id="questionTopic" class="text-xs text-slate-400 font-medium">Topik: Teks Deskripsi</span>
+                    </div>
+                    <h3 id="questionText" class="text-xl md:text-2xl font-bold text-white leading-snug">Memuat soal...</h3>
+                    
+                    <div id="optionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <!-- Options generated dynamically -->
+                    </div>
+                    <div id="feedbackMessage" class="hidden p-4 rounded-2xl text-center font-semibold text-sm"></div>
+                </div>
+
+                <!-- Mission Complete Celebration -->
+                <div id="missionCompleteCard" class="hidden card-glass p-10 rounded-3xl text-center space-y-6 shadow-2xl">
+                    <div class="text-7xl float-anim">🏆</div>
+                    <h2 class="text-3xl font-extrabold text-white">Misi Penyelamatan Laut Selesai!</h2>
+                    <p class="text-slate-300 max-w-lg mx-auto">Luar biasa! Ekosistem terumbu karang kini kembali bersih dan ikan-ikan dapat berenang dengan bebas berkat ketepatan analisis jawabanmu.</p>
+                    <div class="inline-block bg-slate-900/90 border border-sky-500/30 px-8 py-4 rounded-2xl">
+                        <span class="text-xs text-slate-400 block uppercase tracking-wider">Perolehan Skor Akhir</span>
+                        <span id="finalScoreText" class="text-4xl font-extrabold text-sky-400">0 Poin</span>
+                    </div>
+                    <div>
+                        <button onclick="playSound('click'); location.reload()" class="px-8 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-xl transition shadow-lg">Mainkan Lagi / Ganti Nama</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TEACHER DASHBOARD ================= -->
+        <div id="teacherView" class="hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Left: Curriculum & Question Bank Manager -->
+                <div class="card-glass p-6 rounded-3xl space-y-4 md:col-span-1 shadow-xl">
+                    <h3 class="text-lg font-bold text-sky-400 flex items-center justify-between">
+                        <span>⚙️ Pengaturan Kurikulum</span>
+                    </h3>
+                    <p class="text-xs text-slate-300">Ubah mata pelajaran, materi buku paket, tujuan pembelajaran, dan bank soal secara fleksibel.</p>
+                    
+                    <div class="space-y-3 pt-2">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Judul Mata Pelajaran / Aplikasi</label>
+                            <input type="text" id="configAppTitle" value="Bahasa Ocean Quest" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Tujuan Pembelajaran</label>
+                            <textarea id="configObjectives" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-sky-500">1. Siswa mampu memahami struktur, ciri, dan kaidah kebahasaan dalam teks deskripsi.
+2. Siswa dapat mengidentifikasi gagasan utama, kalimat penjelas, serta makna kata dalam paragraf.</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Materi & Penjelasan Buku Paket</label>
+                            <textarea id="configTextbookMaterial" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-sky-500">Teks deskripsi adalah teks yang melukiskan atau menggambarkan suatu objek atau suasana secara terperinci...</textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Kesimpulan Pembelajaran (Tampil di Akhir Materi)</label>
+                            <textarea id="configConclusion" rows="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-sky-500">Ketelitian dalam membaca dan menganalisis teks membantu kita mengomunikasikan informasi secara efektif dan estetis.</textarea>
+                        </div>
+                        <button onclick="playSound('click'); saveCurriculumSettings()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-sky-300 font-semibold text-xs rounded-xl transition border border-sky-500/30">Simpan Perubahan Materi & Judul</button>
+                    </div>
+
+                    <hr class="border-slate-800 my-2">
+
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-md font-bold text-sky-400 flex items-center space-x-1">
+                            <span>📚 Tambah Soal Baru</span>
+                        </h3>
+                        <button onclick="playSound('click'); clearAllQuestions()" class="text-[10px] text-rose-400 hover:text-rose-300 underline font-semibold">Hapus Semua Soal Lama</button>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Pertanyaan / Soal</label>
+                            <textarea id="newQuestionText" rows="2" placeholder="Contoh: Paragraf yang melukiskan suatu objek disebut..." class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-sky-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Topik / Sub-Materi</label>
+                            <input type="text" id="newQuestionTopic" value="Teks Deskripsi" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-sky-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Pilihan A</label>
+                                <input type="text" id="optA" placeholder="Teks Deskripsi" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Pilihan B</label>
+                                <input type="text" id="optB" placeholder="Teks Narasi" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Pilihan C</label>
+                                <input type="text" id="optC" placeholder="Teks Eksposisi" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 mb-1">Pilihan D</label>
+                                <input type="text" id="optD" placeholder="Teks Prosedur" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 mb-1">Kunci Jawaban</label>
+                            <select id="newCorrectOpt" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+                                <option value="0">Pilihan A</option>
+                                <option value="1">Pilihan B</option>
+                                <option value="2">Pilihan C</option>
+                                <option value="3">Pilihan D</option>
+                            </select>
+                            </div>
+                        <button onclick="playSound('click'); addNewQuestion()" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-semibold text-sm rounded-xl transition shadow-lg">Tambah ke Bank Soal</button>
+                    </div>
+                </div>
+
+                <!-- Right: Live Student Progress Tracking & Question List Manager -->
+                <div class="card-glass p-6 rounded-3xl space-y-6 md:col-span-2 shadow-xl">
+                    <div class="flex justify-between items-center flex-wrap gap-4">
+                        <div>
+                            <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+                                <span>📊 Live Student Progress & Bank Soal</span>
+                            </h3>
+                            <p class="text-xs text-slate-300">Pantau progres siswa dan kelola daftar soal aktif.</p>
+                        </div>
+                        <button onclick="playSound('click'); exportReportCSV()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl transition shadow-lg flex items-center space-x-1">
+                            <span>📥 Unduh Laporan CSV</span>
+                        </button>
+                    </div>
+
+                    <!-- Room Control Banner -->
+                    <div class="bg-slate-900/80 border border-sky-500/30 p-4 rounded-2xl flex justify-between items-center flex-wrap gap-4">
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase">Kode Ruangan Aktif</span>
+                            <span class="text-xl font-mono font-bold text-sky-400 tracking-wider">BAHASA2026</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase">Total Siswa Terdaftar</span>
+                            <span id="totalStudentsCount" class="text-xl font-bold text-emerald-400">1 Siswa</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block uppercase">Status Sesi</span>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-400">● Berlangsung</span>
+                        </div>
+                    </div>
+
+                    <!-- Manage Questions List -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <h4 class="text-sm font-bold text-sky-300">Daftar Pertanyaan Aktif Saat Ini (<span id="activeQCount">3</span>):</h4>
+                            <span class="text-[10px] text-slate-400">Guru dapat menghapus soal lama satu per satu atau sekaligus.</span>
+                        </div>
+                        <div id="teacherQuestionsListContainer" class="max-h-48 overflow-y-auto space-y-2 pr-2">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Students Table -->
+                    <div class="overflow-x-auto rounded-2xl border border-slate-700">
+                        <table class="w-full text-left text-sm text-slate-300">
+                            <thead class="bg-slate-900 text-xs uppercase text-sky-400">
+                                <tr>
+                                    <th class="p-3">Nama Siswa</th>
+                                    <th class="p-3">Progres Soal</th>
+                                    <th class="p-3">Skor</th>
+                                    <th class="p-3">Status Misi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentProgressTableBody" class="divide-y divide-slate-800">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="customModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="card-glass max-w-sm w-full p-6 rounded-3xl space-y-4 shadow-2xl text-center">
+            <div id="modalIcon" class="text-4xl">🔒</div>
+            <h3 id="modalTitle" class="text-lg font-bold text-white">Otentikasi Guru</h3>
+            <p id="modalDesc" class="text-xs text-slate-300">Masukkan PIN khusus guru untuk membuka Dashboard Pengelola.</p>
+            <div id="modalBody" class="space-y-3 pt-2">
+                <input type="password" id="teacherPinInput" placeholder="PIN: 1234" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-center font-mono tracking-widest focus:outline-none focus:border-sky-500">
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="playSound('click'); closeModal()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition">Batal</button>
+                    <button onclick="playSound('click'); verifyTeacherPin()" class="py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-xl transition shadow-lg">Masuk</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center py-6 text-xs text-slate-500 border-t border-slate-800 mt-auto">
+        <span id="footerTitle">Bahasa Ocean Quest</span> &bull; Media Inovasi Pembelajaran Interaktif Berbasis Web
+    </footer>
+
+    <script>
+        // Web Audio API sound generator (no external audio files required)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'click') {
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.08);
+                } else if (type === 'correct') {
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.log("Audio not allowed yet");
+            }
+        }
+
+        let appSettings = {
+            title: "Bahasa Ocean Quest",
+            subtitle: "Media Pembelajaran Interaktif Bahasa Indonesia",
+            objectivesText: "1. Siswa mampu memahami struktur, ciri, dan kaidah kebahasaan dalam teks deskripsi.\n2. Siswa dapat mengidentifikasi gagasan utama, kalimat penjelas, serta makna kata dalam paragraf.",
+            materialText: "Teks deskripsi adalah teks yang melukiskan atau menggambarkan suatu objek, tempat, atau suasana tertentu secara jelas dan terperinci sehingga pembaca seolah-olah melihat, mendengar, atau merasakan sendiri.\n• Ciri Objek: Menggambarkan objek secara konkret dan melibatkan panca indra.\n• Gagasan Utama: Ide pokok atau inti pembahasan yang menjadi dasar pengembangan sebuah paragraf.\n• Kalimat Penjelas: Kalimat yang berfungsi menjelaskan atau merinci gagasan utama secara lebih spesifik.\n• Sinonim & Antonim: Sinonim adalah persamaan kata, sedangkan antonim adalah lawan kata.",
+            conclusionText: "Melalui pemahaman kaidah bahasa Indonesia dan ketelitian dalam membaca teks deskripsi, kita dapat menyampaikan informasi secara efektif dan estetis. Keterampilan ini sangat penting dalam mengekspresikan keindahan alam serta menjaga kelestarian lingkungan sekitar!"
+        };
+
+        // Load persisted local data if available
+        if(localStorage.getItem('bahasa_question_bank')) {
+            try {
+                questionBank = JSON.parse(localStorage.getItem('bahasa_question_bank'));
+            } catch(e) {}
+        } else {
+            var questionBank = [
+                {
+                    question: "Teks yang melukiskan atau menggambarkan suatu objek, tempat, atau suasana secara terperinci disebut...",
+                    topic: "Teks Deskripsi",
+                    options: ["Teks Deskripsi", "Teks Narasi", "Teks Eksposisi", "Teks Prosedur"],
+                    correct: 0
+                },
+                {
+                    question: "Ide pokok atau inti pembahasan yang menjadi dasar pengembangan sebuah paragraf dinamakan...",
+                    topic: "Gagasan Utama",
+                    options: ["Kalimat Penjelas", "Gagasan Utama", "Kesimpulan", "Sinonim"],
+                    correct: 1
+                },
+                {
+                    question: "Persamaan kata dari kata 'indah' dalam teks deskripsi adalah...",
+                    topic: "Sinonim & Antonim",
+                    options: ["Kotor", "Elok", "Buruk", "Suram"],
+                    correct: 1
+                }
+            ];
+        }
+
+        let studentSessions = [
+            { name: "Siti Aminah (Demo)", progress: 2, total: 3, score: 200, status: "Aktif Bermain" }
+        ];
+
+        let currentStudent = {
+            name: "",
+            score: 0,
+            currentIndex: 0
+        };
+
+        const TEACHER_PIN = "1234"; // Secure PIN to prevent student access
+
+        function promptTeacherLogin() {
+            const modal = document.getElementById('customModal');
+            const modalIcon = document.getElementById('modalIcon');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDesc = document.getElementById('modalDesc');
+            const modalBody = document.getElementById('modalBody');
+
+            modal.classList.remove('hidden');
+            modalIcon.innerText = "🔒";
+            modalTitle.innerText = "Dashboard Guru Terproteksi";
+            modalDesc.innerText = "Masukkan PIN rahasia guru (1234) untuk mencegah akses siswa.";
+            modalBody.innerHTML = `
+                <input type="password" id="teacherPinInput" placeholder="PIN: 1234" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white text-center font-mono tracking-widest focus:outline-none focus:border-sky-500">
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button onclick="playSound('click'); closeModal()" class="py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl transition">Batal</button>
+                    <button onclick="playSound('click'); verifyTeacherPin()" class="py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-xl transition shadow-lg">Verifikasi</button>
+                </div>
+            `;
+            setTimeout(() => document.getElementById('teacherPinInput').focus(), 100);
+        }
+
+        function verifyTeacherPin() {
+            const pin = document.getElementById('teacherPinInput').value.trim();
+            if(pin === TEACHER_PIN) {
+                closeModal();
+                switchView('teacher');
+            } else {
+                showNotification("PIN Salah! Akses ditolak untuk menjaga keamanan data.", "error");
+            }
+        }
+
+        function showNotification(message, type = "success") {
+            const modal = document.getElementById('customModal');
+            const modalIcon = document.getElementById('modalIcon');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalDesc = document.getElementById('modalDesc');
+            const modalBody = document.getElementById('modalBody');
+
+            modal.classList.remove('hidden');
+            modalIcon.innerText = type === "success" ? "✅" : "⚠️";
+            modalTitle.innerText = type === "success" ? "Berhasil" : "Pemberitahuan Sistem";
+            modalDesc.innerText = message;
+            modalBody.innerHTML = `
+                <button onclick="playSound('click'); closeModal()" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold rounded-xl transition shadow-lg">Tutup</button>
+            `;
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        function switchView(view) {
+            const materialView = document.getElementById('materialView');
+            const studentView = document.getElementById('studentView');
+            const teacherView = document.getElementById('teacherView');
+            const navMaterialBtn = document.getElementById('navMaterialBtn');
+            const navStudentBtn = document.getElementById('navStudentBtn');
+            const navTeacherBtn = document.getElementById('navTeacherBtn');
+
+            materialView.classList.add('hidden');
+            studentView.classList.add('hidden');
+            teacherView.classList.add('hidden');
+            navMaterialBtn.className = "px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+            navStudentBtn.className = "px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+            navTeacherBtn.className = "px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 transition flex items-center space-x-1";
+
+            if(view === 'material') {
+                materialView.classList.remove('hidden');
+                navMaterialBtn.className = "px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-sky-600 text-white shadow-lg transition hover:bg-sky-500";
+            } else if(view === 'student') {
+                studentView.classList.remove('hidden');
+                navStudentBtn.className = "px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-sky-600 text-white shadow-lg transition hover:bg-sky-500";
+            } else {
+                teacherView.classList.remove('hidden');
+                navTeacherBtn.className = "px-3 py-2 text-xs md:text-sm font-semibold rounded-xl bg-sky-600 text-white shadow-lg transition hover:bg-sky-500 flex items-center space-x-1";
+                renderTeacherDashboard();
+            }
+        }
+
+        function saveCurriculumSettings() {
+            const title = document.getElementById('configAppTitle').value.trim();
+            const objectives = document.getElementById('configObjectives').value.trim();
+            const material = document.getElementById('configTextbookMaterial').value.trim();
+            const conclusion = document.getElementById('configConclusion').value.trim();
+
+            if(title) appSettings.title = title;
+            if(objectives) appSettings.objectivesText = objectives;
+            if(material) appSettings.materialText = material;
+            if(conclusion) appSettings.conclusionText = conclusion;
+
+            document.getElementById('appTitleHeader').innerText = appSettings.title;
+            document.getElementById('footerTitle').innerText = appSettings.title;
+            document.getElementById('materialMainTitle').innerText = "Modul " + appSettings.title;
+            
+            document.getElementById('learningObjectivesContainer').innerHTML = appSettings.objectivesText.replace(/\n/g, '<br>');
+            const paragraphs = appSettings.materialText.split('\n').map(p => `<p>${p}</p>`).join('');
+            document.getElementById('textbookContentContainer').innerHTML = paragraphs;
+            document.getElementById('materialConclusionBox').innerText = appSettings.conclusionText;
+
+            showNotification("Pengaturan kurikulum dan materi bahasa Indonesia berhasil diperbarui!", "success");
+        }
+
+        function startStudentGame() {
+            const nameInput = document.getElementById('studentNameInput').value.trim();
+            if(!nameInput) {
+                showNotification('Silakan masukkan nama lengkapmu terlebih dahulu!', 'error');
+                return;
+            }
+            if(questionBank.length === 0) {
+                showNotification('Bank soal masih kosong! Silakan minta guru menambahkan soal terlebih dahulu.', 'error');
+                return;
+            }
+
+            currentStudent.name = nameInput;
+            currentStudent.score = 0;
+            currentStudent.currentIndex = 0;
+
+            document.getElementById('studentLoginCard').classList.add('hidden');
+            document.getElementById('studentGameArea').classList.remove('hidden');
+            document.getElementById('questionCardContainer').classList.remove('hidden');
+            document.getElementById('missionCompleteCard').classList.add('hidden');
+            document.getElementById('displayStudentName').innerText = currentStudent.name;
+
+            let existing = studentSessions.find(s => s.name === currentStudent.name);
+            if(!existing) {
+                studentSessions.push({ name: currentStudent.name, progress: 0, total: questionBank.length, score: 0, status: "Aktif Bermain" });
+            } else {
+                existing.progress = 0;
+                existing.total = questionBank.length;
+                existing.score = 0;
+                existing.status = "Aktif Bermain";
+            }
+
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            studentSessions.forEach(s => s.total = questionBank.length);
+
+            if(currentStudent.currentIndex >= questionBank.length) {
+                const totalQ = questionBank.length;
+                const correctAnswersCount = currentStudent.score / 100;
+                const passingThreshold = totalQ / 2;
+                const isPassed = correctAnswersCount >= passingThreshold;
+
+                if (isPassed) {
+                    playSound('correct');
+                } else {
+                    playSound('wrong');
+                }
+
+                document.getElementById('questionCardContainer').classList.add('hidden');
+                document.getElementById('missionCompleteCard').classList.remove('hidden');
+                document.getElementById('finalScoreText').innerText = currentStudent.score + " Poin";
+                
+                const missionTitleElem = document.getElementById('missionCompleteCard').querySelector('h2');
+                const missionDescElem = document.getElementById('missionCompleteCard').querySelector('p');
+                const celebrationEmoji = document.getElementById('missionCompleteCard').querySelector('.text-7xl');
+
+                let s = studentSessions.find(st => st.name === currentStudent.name);
+
+                if (isPassed) {
+                    celebrationEmoji.innerText = "🏆";
+                    missionTitleElem.innerText = "Misi Penyelamatan Laut Selesai!";
+                    missionDescElem.innerText = `Luar biasa! Kamu berhasil menjawab ${correctAnswersCount} dari ${totalQ} soal dengan benar. Ekosistem terumbu karang kini kembali bersih dan ikan-ikan dapat berenang dengan bebas!`;
+                    if(s) {
+                        s.progress = totalQ;
+                        s.total = totalQ;
+                        s.score = currentStudent.score;
+                        s.status = "Selesai Misi 🏆";
+                    }
+                } else {
+                    celebrationEmoji.innerText = "📚";
+                    missionTitleElem.innerText = "Misi Belum Berhasil ⚠️";
+                    missionDescElem.innerText = `Tetap semangat! Kamu baru menjawab ${correctAnswersCount} dari ${totalQ} soal dengan benar (di bawah setengah). Silakan baca kembali materi buku paket dan coba lagi untuk menyelamatkan lautan!`;
+                    if(s) {
+                        s.progress = totalQ;
+                        s.total = totalQ;
+                        s.score = currentStudent.score;
+                        s.status = "Belum Berhasil ⚠️";
+                    }
+                }
+                return;
+            }
+
+            const q = questionBank[currentStudent.currentIndex];
+            document.getElementById('questionBadge').innerText = `Soal #${currentStudent.currentIndex + 1} dari ${questionBank.length}`;
+            document.getElementById('questionTopic').innerText = `Topik: ${q.topic}`;
+            document.getElementById('questionText').innerText = q.question;
+
+            const optContainer = document.getElementById('optionsContainer');
+            optContainer.innerHTML = '';
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "p-4 bg-slate-900/90 border border-slate-700 hover:border-sky-500 rounded-2xl text-left text-white font-medium transition hover:bg-sky-950/40 flex items-center space-x-3";
+                btn.innerHTML = `<span class="w-8 h-8 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-sm">${String.fromCharCode(65 + idx)}</span><span>${opt}</span>`;
+                btn.onclick = () => { playSound('click'); submitAnswer(idx, q.correct); };
+                optContainer.appendChild(btn);
+            });
+
+            document.getElementById('feedbackMessage').classList.add('hidden');
+            updateStudentUIStats();
+        }
+
+        function submitAnswer(selected, correct) {
+            const feedback = document.getElementById('feedbackMessage');
+            feedback.classList.remove('hidden');
+
+            const buttons = document.getElementById('optionsContainer').getElementsByTagName('button');
+            for(let b of buttons) b.disabled = true;
+
+            if(selected === correct) {
+                playSound('correct');
+                currentStudent.score += 100;
+                feedback.className = "p-4 rounded-2xl text-center font-semibold text-sm bg-emerald-500/20 border border-emerald-500/40 text-emerald-300";
+                feedback.innerHTML = "🎉 Benar! Energi pembersih laut berhasil dikumpulkan (+100 Poin)";
+            } else {
+                playSound('wrong');
+                feedback.className = "p-4 rounded-2xl text-center font-semibold text-sm bg-rose-500/20 border border-rose-500/40 text-rose-300";
+                feedback.innerHTML = `❌ Kurang tepat. Jawaban yang benar adalah: ${questionBank[currentStudent.currentIndex].options[correct]}`;
+            }
+
+            currentStudent.currentIndex++;
+            
+            let s = studentSessions.find(st => st.name === currentStudent.name);
+            if(s) {
+                s.progress = Math.min(currentStudent.currentIndex, questionBank.length);
+                s.total = questionBank.length;
+                s.score = currentStudent.score;
+                const totalQ = questionBank.length;
+                const correctCount = currentStudent.score / 100;
+                s.status = currentStudent.currentIndex >= questionBank.length ? (correctCount >= totalQ / 2 ? "Selesai Misi 🏆" : "Belum Berhasil ⚠️") : "Aktif Bermain";
+            }
+
+            updateStudentUIStats();
+
+            setTimeout(() => {
+                loadQuestion();
+            }, 2200);
+        }
+
+        function updateStudentUIStats() {
+            document.getElementById('displayScore').innerText = currentStudent.score + " Poin";
+            document.getElementById('displayProgressCount').innerText = `${Math.min(currentStudent.currentIndex, questionBank.length)} / ${questionBank.length}`;
+            
+            const percent = questionBank.length > 0 ? Math.round((Math.min(currentStudent.currentIndex, questionBank.length) / questionBank.length) * 100) : 0;
+            document.getElementById('oceanProgressBar').style.width = percent + "%";
+            document.getElementById('oceanPercent').innerText = percent + "% Bersih";
+            
+            if(percent > 60) {
+                document.getElementById('oceanStatusText').innerText = "Kondisi Laut: Air Jernih & Karang Mulai Pulih 🐠";
+            } else {
+                document.getElementById('oceanStatusText').innerText = "Kondisi Laut: Penuh Sampah Plastik 🗑️";
+            }
+        }
+
+        function addNewQuestion() {
+            const qText = document.getElementById('newQuestionText').value.trim();
+            const topic = document.getElementById('newQuestionTopic').value.trim();
+            const a = document.getElementById('optA').value.trim();
+            const b = document.getElementById('optB').value.trim();
+            const c = document.getElementById('optC').value.trim();
+            const d = document.getElementById('optD').value.trim();
+            const correct = parseInt(document.getElementById('newCorrectOpt').value);
+
+            if(!qText || !a || !b || !c || !d) {
+                showNotification('Semua kolom pertanyaan dan pilihan jawaban wajib diisi dengan lengkap!', 'error');
+                return;
+            }
+
+            questionBank.push({
+                question: qText,
+                topic: topic || "Evaluasi",
+                options: [a, b, c, d],
+                correct: correct
+            });
+
+            localStorage.setItem('bahasa_question_bank', JSON.stringify(questionBank));
+
+            document.getElementById('newQuestionText').value = '';
+            document.getElementById('newQuestionTopic').value = 'Teks Deskripsi';
+            document.getElementById('optA').value = '';
+            document.getElementById('optB').value = '';
+            document.getElementById('optC').value = '';
+            document.getElementById('optD').value = '';
+            document.getElementById('newCorrectOpt').value = '0';
+
+            renderTeacherDashboard();
+            showNotification('Berhasil! Soal baru telah ditambahkan ke bank soal.', 'success');
+        }
+
+        function deleteQuestion(index) {
+            questionBank.splice(index, 1);
+            localStorage.setItem('bahasa_question_bank', JSON.stringify(questionBank));
+            
+            if (currentStudent.currentIndex >= questionBank.length && questionBank.length > 0) {
+                currentStudent.currentIndex = questionBank.length - 1;
+            }
+
+            renderTeacherDashboard();
+            showNotification('Soal berhasil dihapus dari bank soal.', 'success');
+        }
+
+        function clearAllQuestions() {
+            if(confirm("Apakah Anda yakin ingin menghapus SEMUA soal lama di bank soal?")) {
+                questionBank = [];
+                localStorage.setItem('bahasa_question_bank', JSON.stringify(questionBank));
+                currentStudent.currentIndex = 0;
+                renderTeacherDashboard();
+                showNotification('Semua soal lama berhasil dibersihkan!', 'success');
+            }
+        }
+
+        function renderTeacherDashboard() {
+            document.getElementById('activeQCount').innerText = questionBank.length;
+            document.getElementById('totalStudentsCount').innerText = studentSessions.length + " Siswa";
+
+            const qListContainer = document.getElementById('teacherQuestionsListContainer');
+            qListContainer.innerHTML = '';
+            if(questionBank.length === 0) {
+                qListContainer.innerHTML = `<div class="text-xs text-slate-500 text-center py-4">Belum ada soal di bank soal. Silakan tambahkan soal baru di atas.</div>`;
+            } else {
+                questionBank.forEach((q, idx) => {
+                    const item = document.createElement('div');
+                    item.className = "bg-slate-900 p-3 rounded-xl border border-slate-700 flex justify-between items-center text-xs";
+                    item.innerHTML = `
+                        <div class="pr-2 truncate">
+                            <span class="font-bold text-sky-400">#${idx+1}</span> <span class="text-white">${q.question}</span>
+                        </div>
+                        <button onclick="playSound('click'); deleteQuestion(${idx})" class="px-2.5 py-1 bg-rose-600/80 hover:bg-rose-600 text-white rounded-lg transition shrink-0">Hapus</button>
+                    `;
+                    qListContainer.appendChild(item);
+                });
+            }
+
+            const tbody = document.getElementById('studentProgressTableBody');
+            tbody.innerHTML = '';
+            studentSessions.forEach(st => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-900/50";
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-white">${st.name}</td>
+                    <td class="p-3">${st.progress} / ${st.total} Soal</td>
+                    <td class="p-3 font-bold text-sky-400">${st.score} Poin</td>
+                    <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-sky-500/20 text-sky-300">${st.status}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function exportReportCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Nama Siswa,Progres,Skor,Status\n";
+            studentSessions.forEach(st => {
+                csvContent += `"${st.name}",${st.progress}/${st.total},${st.score},"${st.status}"\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Laporan_Progres_Bahasa_Ocean_Quest.csv");
+            document.body.appendChild(link);
+            link.click();
+        }
+    </script>
+</body>
+</html>
+
+```
+          

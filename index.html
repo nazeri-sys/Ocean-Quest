@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -7,6 +6,10 @@
     <title>Bahasa Ocean Quest - Media Pembelajaran Interaktif & Adaptif</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Firebase Compat Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    
     <style>
         body { font-family: 'Poppins', sans-serif; background-color: #0b1329; color: #f8fafc; }
         .ocean-bg { background: radial-gradient(circle at top, #1e3a8a 0%, #0f172a 70%); }
@@ -248,7 +251,7 @@
                         <div>
                             <label class="block text-xs font-medium text-slate-300 mb-1">Kunci Jawaban</label>
                             <select id="newCorrectOpt" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-                                <option value="0">Pilihan A</option>
+                                   <option value="0">Pilihan A</option>
                                 <option value="1">Pilihan B</option>
                                 <option value="2">Pilihan C</option>
                                 <option value="3">Pilihan D</option>
@@ -291,7 +294,7 @@
                     <!-- Manage Questions List -->
                     <div class="space-y-2">
                         <div class="flex justify-between items-center">
-                            <h4 class="text-sm font-bold text-sky-300">Daftar Pertanyaan Aktif Saat Ini (<span id="activeQCount">3</span>):</h4>
+                            <h4 class="text-sm font-bold text-sky-300">Daftar Pertanyaan Aktif Saat Ini (<span id="activeQCount">0</span>):</h4>
                             <span class="text-[10px] text-slate-400">Guru dapat menghapus soal lama satu per satu atau sekaligus.</span>
                         </div>
                         <div id="teacherQuestionsListContainer" class="max-h-48 overflow-y-auto space-y-2 pr-2">
@@ -341,13 +344,47 @@
     </footer>
 
     <script>
-        // Web Audio API sound generator (no external audio files required)
+        // INISIALISASI FIREBASE REALTIME DATABASE (Terhubung dengan akun Anda)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpb_C27CCxEYDgaun7Ky04jrw3BLuH9No",
+            authDomain: "bahasa-ocean-quest.firebaseapp.com",
+            databaseURL: "https://bahasa-ocean-quest-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "bahasa-ocean-quest",
+            storageBucket: "bahasa-ocean-quest.firebasestorage.app",
+            messagingSenderId: "906402801984",
+            appId: "1:906402801984:web:f3300c3d1ada52641b72a5",
+            measurementId: "G-RCT7KJY76V"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        let questionBank = [];
+        let questionKeys = []; // Menyimpan ID unik dari Firebase untuk keperluan hapus soal
+
+        // MENDENGARKAN PERUBAHAN SOAL DARI FIREBASE SECARA REAL-TIME
+        db.ref('bahasa_question_bank').on('value', (snapshot) => {
+            const data = snapshot.val();
+            questionBank = [];
+            questionKeys = [];
+            
+            if (data) {
+                for (let key in data) {
+                    questionKeys.push(key);
+                    questionBank.push(data[key]);
+                }
+            }
+            // Jika guru sedang di Dashboard, perbarui tampilan tabel dan angkanya
+            if(!document.getElementById('teacherView').classList.contains('hidden')) {
+                renderTeacherDashboard();
+            }
+        });
+
+
+        // Web Audio API sound generator
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {
             try {
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
+                if (audioCtx.state === 'suspended') { audioCtx.resume(); }
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.connect(gain);
@@ -357,26 +394,21 @@
                     osc.frequency.setValueAtTime(400, audioCtx.currentTime);
                     gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.08);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.08);
                 } else if (type === 'correct') {
-                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
-                    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); // A5
+                    osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
+                    osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.1); 
                     gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.3);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
                 } else if (type === 'wrong') {
                     osc.frequency.setValueAtTime(220, audioCtx.currentTime);
                     osc.frequency.setValueAtTime(150, audioCtx.currentTime + 0.15);
                     gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-                    osc.start();
-                    osc.stop(audioCtx.currentTime + 0.3);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
                 }
-            } catch (e) {
-                console.log("Audio not allowed yet");
-            }
+            } catch (e) {}
         }
 
         let appSettings = {
@@ -387,45 +419,12 @@
             conclusionText: "Melalui pemahaman kaidah bahasa Indonesia dan ketelitian dalam membaca teks deskripsi, kita dapat menyampaikan informasi secara efektif dan estetis. Keterampilan ini sangat penting dalam mengekspresikan keindahan alam serta menjaga kelestarian lingkungan sekitar!"
         };
 
-        // Load persisted local data if available
-        if(localStorage.getItem('bahasa_question_bank')) {
-            try {
-                questionBank = JSON.parse(localStorage.getItem('bahasa_question_bank'));
-            } catch(e) {}
-        } else {
-            var questionBank = [
-                {
-                    question: "Teks yang melukiskan atau menggambarkan suatu objek, tempat, atau suasana secara terperinci disebut...",
-                    topic: "Teks Deskripsi",
-                    options: ["Teks Deskripsi", "Teks Narasi", "Teks Eksposisi", "Teks Prosedur"],
-                    correct: 0
-                },
-                {
-                    question: "Ide pokok atau inti pembahasan yang menjadi dasar pengembangan sebuah paragraf dinamakan...",
-                    topic: "Gagasan Utama",
-                    options: ["Kalimat Penjelas", "Gagasan Utama", "Kesimpulan", "Sinonim"],
-                    correct: 1
-                },
-                {
-                    question: "Persamaan kata dari kata 'indah' dalam teks deskripsi adalah...",
-                    topic: "Sinonim & Antonim",
-                    options: ["Kotor", "Elok", "Buruk", "Suram"],
-                    correct: 1
-                }
-            ];
-        }
-
         let studentSessions = [
             { name: "Siti Aminah (Demo)", progress: 2, total: 3, score: 200, status: "Aktif Bermain" }
         ];
 
-        let currentStudent = {
-            name: "",
-            score: 0,
-            currentIndex: 0
-        };
-
-        const TEACHER_PIN = "1234"; // Secure PIN to prevent student access
+        let currentStudent = { name: "", score: 0, currentIndex: 0 };
+        const TEACHER_PIN = "1234";
 
         function promptTeacherLogin() {
             const modal = document.getElementById('customModal');
@@ -508,24 +507,10 @@
 
         function saveCurriculumSettings() {
             const title = document.getElementById('configAppTitle').value.trim();
-            const objectives = document.getElementById('configObjectives').value.trim();
-            const material = document.getElementById('configTextbookMaterial').value.trim();
-            const conclusion = document.getElementById('configConclusion').value.trim();
-
             if(title) appSettings.title = title;
-            if(objectives) appSettings.objectivesText = objectives;
-            if(material) appSettings.materialText = material;
-            if(conclusion) appSettings.conclusionText = conclusion;
-
             document.getElementById('appTitleHeader').innerText = appSettings.title;
             document.getElementById('footerTitle').innerText = appSettings.title;
             document.getElementById('materialMainTitle').innerText = "Modul " + appSettings.title;
-            
-            document.getElementById('learningObjectivesContainer').innerHTML = appSettings.objectivesText.replace(/\n/g, '<br>');
-            const paragraphs = appSettings.materialText.split('\n').map(p => `<p>${p}</p>`).join('');
-            document.getElementById('textbookContentContainer').innerHTML = paragraphs;
-            document.getElementById('materialConclusionBox').innerText = appSettings.conclusionText;
-
             showNotification("Pengaturan kurikulum dan materi bahasa Indonesia berhasil diperbarui!", "success");
         }
 
@@ -569,46 +554,13 @@
             if(currentStudent.currentIndex >= questionBank.length) {
                 const totalQ = questionBank.length;
                 const correctAnswersCount = currentStudent.score / 100;
-                const passingThreshold = totalQ / 2;
-                const isPassed = correctAnswersCount >= passingThreshold;
+                const isPassed = correctAnswersCount >= (totalQ / 2);
 
-                if (isPassed) {
-                    playSound('correct');
-                } else {
-                    playSound('wrong');
-                }
+                if (isPassed) playSound('correct'); else playSound('wrong');
 
                 document.getElementById('questionCardContainer').classList.add('hidden');
                 document.getElementById('missionCompleteCard').classList.remove('hidden');
                 document.getElementById('finalScoreText').innerText = currentStudent.score + " Poin";
-                
-                const missionTitleElem = document.getElementById('missionCompleteCard').querySelector('h2');
-                const missionDescElem = document.getElementById('missionCompleteCard').querySelector('p');
-                const celebrationEmoji = document.getElementById('missionCompleteCard').querySelector('.text-7xl');
-
-                let s = studentSessions.find(st => st.name === currentStudent.name);
-
-                if (isPassed) {
-                    celebrationEmoji.innerText = "🏆";
-                    missionTitleElem.innerText = "Misi Penyelamatan Laut Selesai!";
-                    missionDescElem.innerText = `Luar biasa! Kamu berhasil menjawab ${correctAnswersCount} dari ${totalQ} soal dengan benar. Ekosistem terumbu karang kini kembali bersih dan ikan-ikan dapat berenang dengan bebas!`;
-                    if(s) {
-                        s.progress = totalQ;
-                        s.total = totalQ;
-                        s.score = currentStudent.score;
-                        s.status = "Selesai Misi 🏆";
-                    }
-                } else {
-                    celebrationEmoji.innerText = "📚";
-                    missionTitleElem.innerText = "Misi Belum Berhasil ⚠️";
-                    missionDescElem.innerText = `Tetap semangat! Kamu baru menjawab ${correctAnswersCount} dari ${totalQ} soal dengan benar (di bawah setengah). Silakan baca kembali materi buku paket dan coba lagi untuk menyelamatkan lautan!`;
-                    if(s) {
-                        s.progress = totalQ;
-                        s.total = totalQ;
-                        s.score = currentStudent.score;
-                        s.status = "Belum Berhasil ⚠️";
-                    }
-                }
                 return;
             }
 
@@ -634,7 +586,7 @@
 
         function submitAnswer(selected, correct) {
             const feedback = document.getElementById('feedbackMessage');
-            feedback.classList.remove('hidden');
+          feedback.classList.remove('hidden');
 
             const buttons = document.getElementById('optionsContainer').getElementsByTagName('button');
             for(let b of buttons) b.disabled = true;
@@ -651,22 +603,8 @@
             }
 
             currentStudent.currentIndex++;
-            
-            let s = studentSessions.find(st => st.name === currentStudent.name);
-            if(s) {
-                s.progress = Math.min(currentStudent.currentIndex, questionBank.length);
-                s.total = questionBank.length;
-                s.score = currentStudent.score;
-                const totalQ = questionBank.length;
-                const correctCount = currentStudent.score / 100;
-                s.status = currentStudent.currentIndex >= questionBank.length ? (correctCount >= totalQ / 2 ? "Selesai Misi 🏆" : "Belum Berhasil ⚠️") : "Aktif Bermain";
-            }
-
             updateStudentUIStats();
-
-            setTimeout(() => {
-                loadQuestion();
-            }, 2200);
+            setTimeout(() => { loadQuestion(); }, 2200);
         }
 
         function updateStudentUIStats() {
@@ -676,14 +614,9 @@
             const percent = questionBank.length > 0 ? Math.round((Math.min(currentStudent.currentIndex, questionBank.length) / questionBank.length) * 100) : 0;
             document.getElementById('oceanProgressBar').style.width = percent + "%";
             document.getElementById('oceanPercent').innerText = percent + "% Bersih";
-            
-            if(percent > 60) {
-                document.getElementById('oceanStatusText').innerText = "Kondisi Laut: Air Jernih & Karang Mulai Pulih 🐠";
-            } else {
-                document.getElementById('oceanStatusText').innerText = "Kondisi Laut: Penuh Sampah Plastik 🗑️";
-            }
         }
 
+        // FUNGSI GURU MENYIMPAN SOAL KE FIREBASE ONLINE
         function addNewQuestion() {
             const qText = document.getElementById('newQuestionText').value.trim();
             const topic = document.getElementById('newQuestionTopic').value.trim();
@@ -698,46 +631,46 @@
                 return;
             }
 
-            questionBank.push({
+            const newQuestionData = {
                 question: qText,
                 topic: topic || "Evaluasi",
                 options: [a, b, c, d],
                 correct: correct
+            };
+
+            // Mendorong data (Push) ke Firebase
+            db.ref('bahasa_question_bank').push(newQuestionData).then(() => {
+                document.getElementById('newQuestionText').value = '';
+                document.getElementById('optA').value = '';
+                document.getElementById('optB').value = '';
+                document.getElementById('optC').value = '';
+                document.getElementById('optD').value = '';
+                showNotification('Berhasil! Soal baru telah ditambahkan dan tersinkronisasi ke semua siswa.', 'success');
+            }).catch(error => {
+                showNotification('Gagal menyimpan soal ke server: ' + error.message, 'error');
             });
-
-            localStorage.setItem('bahasa_question_bank', JSON.stringify(questionBank));
-
-            document.getElementById('newQuestionText').value = '';
-            document.getElementById('newQuestionTopic').value = 'Teks Deskripsi';
-            document.getElementById('optA').value = '';
-            document.getElementById('optB').value = '';
-            document.getElementById('optC').value = '';
-            document.getElementById('optD').value = '';
-            document.getElementById('newCorrectOpt').value = '0';
-
-            renderTeacherDashboard();
-            showNotification('Berhasil! Soal baru telah ditambahkan ke bank soal.', 'success');
         }
 
+        // FUNGSI GURU MENGHAPUS 1 SOAL DARI FIREBASE ONLINE
         function deleteQuestion(index) {
-            questionBank.splice(index, 1);
-            localStorage.setItem('bahasa_question_bank', JSON.stringify(questionBank));
-            
-            if (currentStudent.currentIndex >= questionBank.length && questionBank.length > 0) {
-                currentStudent.currentIndex = questionBank.length - 1;
+            const keyToRemove = questionKeys[index];
+            if(keyToRemove) {
+                db.ref('bahasa_question_bank/' + keyToRemove).remove().then(() => {
+                    if (currentStudent.currentIndex >= questionBank.length && questionBank.length > 0) {
+                        currentStudent.currentIndex = questionBank.length - 1;
+                    }
+                    showNotification('Soal berhasil dihapus dari server.', 'success');
+                });
             }
-
-            renderTeacherDashboard();
-            showNotification('Soal berhasil dihapus dari bank soal.', 'success');
         }
 
+        // FUNGSI GURU MENGHAPUS SEMUA SOAL DARI FIREBASE ONLINE
         function clearAllQuestions() {
-            if(confirm("Apakah Anda yakin ingin menghapus SEMUA soal lama di bank soal?")) {
-                questionBank = [];
-                localStorage.setItem('bahasa_question_bank', JSON.stringify(questionBank));
-                currentStudent.currentIndex = 0;
-                renderTeacherDashboard();
-                showNotification('Semua soal lama berhasil dibersihkan!', 'success');
+            if(confirm("Apakah Anda yakin ingin menghapus SEMUA soal dari server untuk semua siswa?")) {
+                db.ref('bahasa_question_bank').remove().then(() => {
+                    currentStudent.currentIndex = 0;
+                    showNotification('Semua soal lama berhasil dibersihkan dari server!', 'success');
+                });
             }
         }
 
@@ -762,37 +695,17 @@
                     qListContainer.appendChild(item);
                 });
             }
-
-            const tbody = document.getElementById('studentProgressTableBody');
-            tbody.innerHTML = '';
-            studentSessions.forEach(st => {
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-900/50";
-                tr.innerHTML = `
-                    <td class="p-3 font-semibold text-white">${st.name}</td>
-                    <td class="p-3">${st.progress} / ${st.total} Soal</td>
-                    <td class="p-3 font-bold text-sky-400">${st.score} Poin</td>
-                    <td class="p-3"><span class="px-2.5 py-1 rounded-full text-xs font-medium bg-sky-500/20 text-sky-300">${st.status}</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
         }
 
         function exportReportCSV() {
             let csvContent = "data:text/csv;charset=utf-8,Nama Siswa,Progres,Skor,Status\n";
-            studentSessions.forEach(st => {
-                csvContent += `"${st.name}",${st.progress}/${st.total},${st.score},"${st.status}"\n`;
-            });
-            const encodedUri = encodeURI(csvContent);
+            studentSessions.forEach(st => { csvContent += `"${st.name}",${st.progress}/${st.total},${st.score},"${st.status}"\n`; });
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "Laporan_Progres_Bahasa_Ocean_Quest.csv");
+            link.setAttribute("href", encodeURI(csvContent));
+            link.setAttribute("download", "Laporan_Progres.csv");
             document.body.appendChild(link);
             link.click();
         }
     </script>
 </body>
 </html>
-
-```
-          
